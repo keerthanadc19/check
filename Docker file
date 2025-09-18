@@ -1,28 +1,29 @@
+# Use slim Python 3.9 image
 FROM python:3.9-slim
 
+# Set working directory
 WORKDIR /app
 
-COPY requirements.txt ./
+# Copy requirements and app
+COPY requirements.txt ./ 
 COPY app.py ./
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install minimal system dependencies needed for OpenCV + Streamlit
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    cmake \
-    curl \
-    unzip \
-    pkg-config \
-    libjpeg-dev \
-    libpng-dev \
     libgl1 \
     libglib2.0-0 \
-    libgtk-3-0 \
+    libjpeg-dev \
+    libpng-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
+# Upgrade pip and install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Expose Streamlit default port
 EXPOSE 8501
 
-CMD streamlit run app.py --server.port=$PORT --server.address=0.0.0.0 --server.enableCORS=false
+# Run Streamlit
+CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.enableCORS=false"]
